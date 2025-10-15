@@ -1,25 +1,71 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState, useRef } from "react";
+
+import SearchIcon from './search.svg';
+import MovieCard from "./MovieCard";
+
+
+const API_URL = 'https://www.omdbapi.com?apikey=e2d653b9'; 
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+  
+  const [searchTerm, setSearchTerm] = useState('');
+  const [movies, setMovies] = useState([]);
+
+  const inputRef = useRef(null)
+
+  const searchMovies = async(title) => {
+    try{
+      const response = await fetch(`${API_URL}&s=${title}`)
+      const data = await response.json()
+      setMovies(data.Search)
+      console.log(data.Search)
+    }
+    catch(err){
+      console.log('Sorry, could not fetch movies now')
+    }
+  }
+
+  useEffect(() => {
+    searchMovies('Spiderman');
+  }, [])
+
+  return(
+    <div className="app">
+      <h1>MovieLand</h1>
+
+      <div className="search">
+        <input 
+          placeholder="Search for movies here" 
+          value={searchTerm}
+          ref={inputRef}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+        <img 
+          src={SearchIcon} alt="search"
+          onClick={() => {
+            searchMovies(searchTerm)
+            inputRef.current.focus()
+          }}
+        />        
+      </div>
+
+      {
+        movies?.length > 0
+        ?(
+          <div className="container">
+            {movies.map((movie) => (
+              <MovieCard movie={movie}/>
+            ))}
+          </div>
+        ) : (
+          <div className="empty">
+            <h2>No movies found</h2>
+          </div>
+        )
+      }
     </div>
   );
 }
 
 export default App;
+
